@@ -44,9 +44,15 @@ def _fetch_sunset(for_date: date) -> Optional[datetime]:
         return None
 
 
+_EASTERN = timezone(timedelta(hours=-5))  # ET standard; DST handled below
+
+
 def _fmt(dt: datetime) -> str:
-    # Convert UTC → local machine time (Eastern if system is set correctly)
-    local = dt.astimezone()
+    # Determine Eastern offset: EDT (UTC-4) Mar–Nov, EST (UTC-5) otherwise
+    month = dt.month
+    offset = timedelta(hours=-4) if 3 <= month <= 11 else timedelta(hours=-5)
+    eastern = timezone(offset)
+    local = dt.astimezone(eastern)
     return local.strftime("%-I:%M %p")
 
 
