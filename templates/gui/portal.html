@@ -335,15 +335,35 @@
       margin-top: 5px;
       line-height: 1.5;
     }
+    .event-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
     .event-link {
-      display: inline-block;
-      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       font-size: 11px;
       font-weight: 600;
       color: var(--navy);
       border-bottom: 1px solid var(--gold);
       padding-bottom: 1px;
     }
+    .event-directions {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--navy);
+      padding: 5px 12px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+    .event-directions:hover { background: var(--gold); color: var(--navy); }
     .no-content { color: var(--muted); font-size: 13px; font-style: italic; }
 
     /* ── CAMPAIGN ── */
@@ -640,7 +660,18 @@
           <div class="event-title">{{ ev.title }}</div>
           {% if ev.location %}<div class="event-meta"><i class="fas fa-map-marker-alt" style="font-size:10px;margin-right:4px"></i>{{ ev.location }}</div>{% endif %}
           {% if ev.description %}<div class="event-desc">{{ ev.description }}</div>{% endif %}
-          {% if ev.url %}<a class="event-link" href="{{ ev.url }}" target="_blank">More info →</a>{% endif %}
+          {% if ev.url or ev.location %}
+          <div class="event-actions">
+            {% if ev.location %}
+            <a class="event-directions" href="https://www.google.com/maps/search/?api=1&query={{ ev.location | urlencode }}" target="_blank">
+              <i class="fas fa-map-marker-alt" style="font-size:10px"></i> Get Directions
+            </a>
+            {% endif %}
+            {% if ev.url %}
+            <a class="event-link" href="{{ ev.url }}" target="_blank">More info →</a>
+            {% endif %}
+          </div>
+          {% endif %}
         </div>
       </div>
       {% endfor %}

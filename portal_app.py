@@ -69,7 +69,7 @@ def _fetch() -> dict:
                 "day": e.parsed_date.strftime("%-d") if e.parsed_date else "—",
                 "month": e.parsed_date.strftime("%b").upper() if e.parsed_date else "",
                 "location": e.location,
-                "description": e.description[:200] if e.description else "",
+                "description": e.description or "",
                 "category": e.category,
                 "url": e.url,
             }
