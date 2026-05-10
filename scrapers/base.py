@@ -32,6 +32,7 @@ class Event:
     url: str = ""
     category: str = "General"
     parsed_date: Optional[date] = field(default=None, repr=False)
+    parsed_end_date: Optional[date] = field(default=None, repr=False)
 
     @property
     def uid(self) -> str:

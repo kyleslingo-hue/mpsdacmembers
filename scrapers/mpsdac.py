@@ -151,4 +151,8 @@ class MPSDACscraper:
             category=category,
         )
         e.parsed_date = local_date
+        if end_dt:
+            end_local = end_dt.astimezone().date()
+            if end_local != local_date:
+                e.parsed_end_date = end_local
         return e

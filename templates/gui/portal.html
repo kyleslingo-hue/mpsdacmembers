@@ -651,8 +651,16 @@
       {% for ev in data.events %}
       <div class="event-card">
         <div class="event-date-box">
-          <div class="day">{{ ev.day }}</div>
-          <div class="mo">{{ ev.month }}</div>
+          {% if ev.end_day and ev.end_month != ev.month %}
+            <div class="day" style="font-size:18px;line-height:1.1">{{ ev.day }}<span style="color:var(--gold);font-size:14px;font-weight:600;display:block;margin:1px 0">—</span>{{ ev.end_day }}</div>
+            <div class="mo">{{ ev.month }}/{{ ev.end_month }}</div>
+          {% elif ev.end_day %}
+            <div class="day" style="font-size:18px;line-height:1.1">{{ ev.day }}–{{ ev.end_day }}</div>
+            <div class="mo">{{ ev.month }}</div>
+          {% else %}
+            <div class="day">{{ ev.day }}</div>
+            <div class="mo">{{ ev.month }}</div>
+          {% endif %}
         </div>
         <div class="event-vbar"></div>
         <div class="event-body">
