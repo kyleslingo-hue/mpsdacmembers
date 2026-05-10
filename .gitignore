@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+
+# App output & cache
+output/
+uploads/
+
+# macOS
+.DS_Store

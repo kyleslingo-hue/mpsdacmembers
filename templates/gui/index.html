@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MPSDAC Communications</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #080c14;
+      --navy2: #1f2840;
+      --gold: #d4a547;
+      --gold-light: #f0c96a;
+      --bg: #f0ede8;
+      --card: #ffffff;
+      --border: #e5e0d8;
+      --text: #1a1a1a;
+      --muted: #6b7280;
+      --sidebar-w: 240px;
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--navy);
+      min-height: 100vh;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid #ffffff10;
+    }
+    .sidebar-brand img {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold);
+      margin-bottom: 10px;
+      display: block;
+    }
+    .sidebar-brand h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      color: #fff;
+      line-height: 1.3;
+    }
+    .sidebar-brand p { font-size: 10px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+    .sidebar-nav { padding: 16px 0; flex: 1; }
+    .nav-section-label {
+      font-size: 9px;
+      color: #ffffff35;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 8px 20px 4px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: #ffffff80;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .nav-item:hover { color: #fff; background: #ffffff08; }
+    .nav-item.active { color: var(--gold); border-left-color: var(--gold); background: #ffffff08; }
+    .nav-item i { width: 16px; text-align: center; font-size: 13px; }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #ffffff10;
+      font-size: 11px;
+      color: #ffffff35;
+    }
+    .sidebar-footer span { color: var(--gold); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-title { font-weight: 600; font-size: 15px; color: var(--navy); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--navy); color: #fff; }
+    .btn-primary:hover { background: var(--navy2); }
+    .btn-gold { background: var(--gold); color: var(--navy); }
+    .btn-gold:hover { background: var(--gold-light); }
+    .btn-outline { background: transparent; color: var(--navy); border: 1.5px solid var(--border); }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
+    .btn-danger { background: #fee2e2; color: #991b1b; }
+    .btn-danger:hover { background: #fca5a5; }
+
+    /* ── CONTENT ── */
+    .content { padding: 28px 32px; flex: 1; }
+
+    /* ── PANEL / TAB SYSTEM ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--navy);
+    }
+    .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--navy);
+    }
+    .card-icon {
+      width: 28px; height: 28px;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    /* ── GRID ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    /* ── SABBATH BANNER ── */
+    .sabbath-card {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+      border-radius: 10px;
+      padding: 20px 24px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .sabbath-card .label { font-size: 10px; color: var(--gold); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+    .sabbath-card .date { font-family: 'Playfair Display', serif; font-size: 17px; }
+    .sabbath-card .countdown { font-size: 32px; font-weight: 700; color: var(--gold); line-height: 1; }
+    .sabbath-card .countdown-label { font-size: 11px; color: #ffffff60; margin-top: 2px; }
+    .sunset-pills { display: flex; gap: 16px; margin-top: 12px; width: 100%; flex-wrap: wrap; }
+    .sunset-pill {
+      background: #ffffff12;
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sunset-pill .time { color: var(--gold); font-weight: 600; }
+
+    /* ── SPEAKER LIST ── */
+    .speaker-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .speaker-row:last-child { border-bottom: none; }
+    .speaker-date { min-width: 88px; font-size: 12px; color: var(--muted); }
+    .gold-bar-small { width: 3px; height: 28px; background: var(--gold); border-radius: 2px; flex-shrink: 0; }
+    .speaker-name { font-size: 13px; font-weight: 600; }
+
+    /* ── EVENT LIST ── */
+    .event-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .event-row:last-child { border-bottom: none; }
+    .event-date-box {
+      min-width: 40px;
+      text-align: center;
+      background: var(--bg);
+      border-radius: 6px;
+      padding: 5px;
+    }
+    .event-date-box .day { font-size: 18px; font-weight: 800; color: var(--navy); line-height: 1; }
+    .event-date-box .mo { font-size: 9px; text-transform: uppercase; color: var(--gold); font-weight: 700; letter-spacing: 0.5px; }
+    .event-info .title { font-size: 13px; font-weight: 600; }
+    .event-info .meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      background: var(--bg);
+      color: var(--muted);
+      margin-right: 4px;
+    }
+
+    /* ── MEDIA CARDS ── */
+    .media-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .media-mini {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .media-mini .thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--navy);
+      overflow: hidden;
+    }
+    .media-mini .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .media-mini .play-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.3);
+    }
+    .media-mini .play-icon i { color: white; font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .media-mini .info { padding: 8px 10px; }
+    .media-mini .type { font-size: 9px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; font-weight: 700; margin-bottom: 3px; }
+    .media-mini .title { font-size: 11px; font-weight: 600; line-height: 1.3; }
+
+    /* ── PHOTO LIBRARY ── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 20px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--gold);
+      background: #d4a54708;
+    }
+    .upload-zone i { font-size: 36px; color: var(--border); margin-bottom: 12px; display: block; }
+    .upload-zone .upload-zone-text { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+    .upload-zone .upload-zone-sub { font-size: 12px; color: var(--muted); }
+    #file-input { display: none; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    .photo-card {
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      background: var(--card);
+    }
+    .photo-card:hover { border-color: var(--gold); box-shadow: 0 4px 12px rgba(212,165,71,0.2); }
+    .photo-card.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,165,71,0.3); }
+    .photo-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+    .photo-card .photo-name {
+      padding: 6px 8px;
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .photo-card .photo-actions {
+      position: absolute;
+      top: 6px; right: 6px;
+      display: flex;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .photo-card:hover .photo-actions { opacity: 1; }
+    .photo-action-btn {
+      width: 26px; height: 26px;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+    .photo-action-btn:hover { background: rgba(0,0,0,0.85); }
+    .photo-action-btn.delete:hover { background: #dc2626; }
+    .empty-library {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--muted);
+    }
+    .empty-library i { font-size: 48px; color: var(--border); margin-bottom: 12px; display: block; }
+
+    /* ── NEWSLETTER SLOTS ── */
+    .slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .photo-slot {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      aspect-ratio: 4/3;
+      position: relative;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .photo-slot:hover { border-color: var(--gold); }
+    .photo-slot.filled { border-style: solid; border-color: var(--gold); }
+    .photo-slot.filled img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .photo-slot .slot-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(8,12,20,0.75);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .photo-slot .slot-empty-icon { font-size: 28px; color: var(--border); }
+    .photo-slot .slot-empty-text { font-size: 12px; color: var(--muted); }
+    .slot-clear-btn {
+      background: none;
+      border: none;
+      color: #ffffff90;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .slot-clear-btn:hover { color: #fff; }
+
+    /* ── PICKER MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card);
+      border-radius: 12px;
+      width: 90%;
+      max-width: 720px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 15px; font-weight: 600; }
+    .modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; }
+    .modal-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+    .close-btn { background: none; border: none; font-size: 20px; color: var(--muted); cursor: pointer; }
+
+    /* ── TEXT EDITOR ── */
+    .highlight-editor {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 80px;
+      color: var(--text);
+    }
+    .highlight-editor:focus { outline: none; border-color: var(--gold); }
+
+    /* ── PREVIEW FRAME ── */
+    .preview-bar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-tab {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: var(--muted);
+      border: 1.5px solid transparent;
+    }
+    .preview-tab.active { color: var(--navy); border-color: var(--border); background: var(--bg); }
+    .preview-frame-wrap { flex: 1; overflow: hidden; }
+    .preview-frame {
+      width: 100%;
+      height: calc(100vh - 140px);
+      border: none;
+      background: var(--bg);
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.25s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast i { color: var(--gold); }
+
+    /* ── STATUS DOT ── */
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+      margin-right: 4px;
+    }
+
+    .refresh-btn { font-size: 13px; }
+    .refresh-btn i { transition: transform 0.5s; }
+    .refresh-btn.spinning i { transform: rotate(360deg); }
+  </style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="https://mpsdac.org/images/church-logo.png" alt="Logo">
+    <h2>Middletown Portland SDA</h2>
+    <p>Communications</p>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Workspace</div>
+    <a class="nav-item active" onclick="showPanel('dashboard')">
+      <i class="fas fa-th-large"></i> Dashboard
+    </a>
+    <a class="nav-item" onclick="showPanel('photos')">
+      <i class="fas fa-images"></i> Photo Library
+    </a>
+    <a class="nav-item" onclick="showPanel('newsletter')">
+      <i class="fas fa-newspaper"></i> Newsletter Builder
+    </a>
+    <div class="nav-section-label" style="margin-top:12px">Preview & Export</div>
+    <a class="nav-item" onclick="showPanel('preview')">
+      <i class="fas fa-eye"></i> Preview
+    </a>
+    <a class="nav-item" href="/generate/email" target="_blank">
+      <i class="fas fa-envelope"></i> Download Email
+    </a>
+    <a class="nav-item" href="/generate/newsletter" target="_blank">
+      <i class="fas fa-file-alt"></i> Download Newsletter
+    </a>
+    <a class="nav-item" href="/generate/newsletter-md" target="_blank">
+      <i class="fab fa-markdown"></i> Download Markdown
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    Data fetched at <span>{{ data.fetched_at }}</span>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-right">
+      <button class="btn btn-outline btn-sm refresh-btn" onclick="refreshData(this)">
+        <i class="fas fa-sync-alt"></i> Refresh Data
+      </button>
+      <a class="btn btn-gold btn-sm" href="/preview/email" target="_blank">
+        <i class="fas fa-eye"></i> Preview Email
+      </a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══════════════════════════════════════════════
+         PANEL: DASHBOARD
+    ══════════════════════════════════════════════ -->
+    <div class="panel active" id="panel-dashboard">
+
+      <div class="page-header">
+        <div>
+          <h1>This Week's Communications</h1>
+          <p>{{ today }} &mdash; all data pulled automatically</p>
+        </div>
+      </div>
+
+      <!-- Sabbath Banner -->
+      <div class="sabbath-card">
+        <div>
+          <div class="label">Upcoming Sabbath</div>
+          <div class="date">{{ data.sabbath.date }}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="countdown">{{ data.sabbath.days }}</div>
+          <div class="countdown-label">days away</div>
+        </div>
+        {% if data.sabbath.begins %}
+        <div class="sunset-pills">
+          <div class="sunset-pill">🌇 Sabbath begins (Fri) <span class="time">{{ data.sabbath.begins }}</span></div>
+          <div class="sunset-pill">🌆 Sabbath ends (Sat) <span class="time">{{ data.sabbath.ends }}</span></div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="grid-2">
+
+        <!-- Speakers -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><div class="card-icon"><i class="fas fa-microphone"></i></div> Upcoming Speakers</div>
+            <span class="badge">{{ data.speakers|length }} scheduled</span>
+          </div>
+          {% if data.speakers %}
+            {% for s in data.speakers %}
+            <div class="speaker-row">
+              <div class="speaker-date">{{ s.date }}</div>
+              <div class="gold-bar-small"></div>
+              <div>
+                <div class="speaker-name">{{ s.speaker }}</div>
+                {% if s.sermon %}<div style="font-size:11px;color:var(--muted);font-style:italic">{{ s.sermon }}</div>{% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p style="color:var(--muted);font-size:13px">No speaker data available.</p>
+          {% endif %}
+        </div>
+
+        <!-- This Week's Media -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><div class="card-icon">▶</div> This Week's Service</div>
+          </div>
+          {% if data.media.stream or data.media.video %}
+          <div class="media-row">
+            {% if data.media.stream %}
+            <a class="media-mini" href="{{ data.media.stream.url }}" target="_blank" style="text-decoration:none;color:inherit">
+              <div class="thumb"><img src="{{ data.media.stream.thumb }}" alt=""><div class="play-icon"><i class="fas fa-play"></i></div></div>
+              <div class="info"><div class="type">Live Stream</div><div class="title">{{ data.media.stream.title[:60] }}</div></div>
+            </a>
+            {% endif %}
+            {% if data.media.video %}
+            <a class="media-mini" href="{{ data.media.video.url }}" target="_blank" style="text-decoration:none;color:inherit">
+              <div class="thumb"><img src="{{ data.media.video.thumb }}" alt=""><div class="play-icon"><i class="fas fa-play"></i></div></div>
+              <div class="info"><div class="type">Latest Upload</div><div class="title">{{ data.media.video.title[:60] }}</div></div>
+            </a>
+            {% endif %}
+          </div>
+          {% else %}
+          <p style="color:var(--muted);font-size:13px">No media found yet.</p>
+          {% endif %}
+        </div>
+
+      </div><!-- /grid-2 -->
+
+      <!-- Events -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-icon"><i class="fas fa-calendar"></i></div> Upcoming Events</div>
+          <span class="badge">{{ data.events|length }} events</span>
+        </div>
+        {% if data.events %}
+        <div class="grid-2" style="gap:0">
+          {% for ev in data.events %}
+          <div class="event-row">
+            {% set parts = ev.date.split() %}
+            <div class="event-date-box">
+              <div class="day">{{ ev.day }}</div>
+              <div class="mo">{{ ev.month }}</div>
+            </div>
+            <div class="event-info">
+              <span class="badge">{{ ev.category }}</span>
+              <div class="title">{{ ev.title }}</div>
+              {% if ev.location %}<div class="meta"><i class="fas fa-map-marker-alt" style="font-size:10px"></i> {{ ev.location[:40] }}</div>{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--muted);font-size:13px">No upcoming events.</p>
+        {% endif %}
+      </div>
+
+    </div><!-- /panel-dashboard -->
+
+
+    <!-- ══════════════════════════════════════════════
+         PANEL: PHOTOS
+    ══════════════════════════════════════════════ -->
+    <div class="panel" id="panel-photos">
+      <div class="page-header">
+        <div>
+          <h1>Photo Library</h1>
+          <p>Upload and manage photos for the newsletter</p>
+        </div>
+        <button class="btn btn-gold" onclick="document.getElementById('file-input').click()">
+          <i class="fas fa-upload"></i> Upload Photos
+        </button>
+      </div>
+
+      <input type="file" id="file-input" accept="image/*" multiple onchange="uploadFiles(this.files)">
+
+      <div class="upload-zone" id="upload-zone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <div class="upload-zone-text">Drag & drop photos here</div>
+        <div class="upload-zone-sub">or click to browse &mdash; JPG, PNG, GIF, WebP up to 20MB each</div>
+      </div>
+
+      <div id="photo-grid-container">
+        {% if photos %}
+        <div class="photo-grid" id="photo-grid">
+          {% for photo in photos %}
+          <div class="photo-card" id="photo-{{ photo.name }}" onclick="selectPhoto('{{ photo.name }}')">
+            <img src="{{ photo.thumb }}" alt="{{ photo.name }}" loading="lazy">
+            <div class="photo-name">{{ photo.name }}</div>
+            <div class="photo-actions">
+              <button class="photo-action-btn delete" onclick="deletePhoto(event, '{{ photo.name }}')"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-library" id="empty-msg">
+          <i class="fas fa-images"></i>
+          <p>No photos yet — upload some to get started.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div><!-- /panel-photos -->
+
+
+    <!-- ══════════════════════════════════════════════
+         PANEL: NEWSLETTER BUILDER
+    ══════════════════════════════════════════════ -->
+    <div class="panel" id="panel-newsletter">
+      <div class="page-header">
+        <div>
+          <h1>Newsletter Builder</h1>
+          <p>Assign photos to each newsletter section, then generate</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <a class="btn btn-outline" href="/preview/newsletter" target="_blank"><i class="fas fa-eye"></i> Preview</a>
+          <a class="btn btn-gold" href="/generate/newsletter" target="_blank"><i class="fas fa-download"></i> Download</a>
+        </div>
+      </div>
+
+      <!-- Ministry Highlight Text -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-icon"><i class="fas fa-star"></i></div> Ministry Highlight Text</div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">This appears at the top of the newsletter as a ministry spotlight. You can use <strong>bold</strong> text.</p>
+        <textarea class="highlight-editor" id="highlight-text" placeholder="e.g. This month we're celebrating our Pathfinder club achievements and welcoming new members..."
+          onblur="saveText('highlight', this.value)">{{ state.custom_text.get('highlight', '') }}</textarea>
+      </div>
+
+      <!-- Photo Slots -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-icon"><i class="fas fa-images"></i></div> Photo Slots</div>
+          <span style="font-size:12px;color:var(--muted)">Click a slot to assign a photo from your library</span>
+        </div>
+
+        <div class="slot-grid">
+
+          {% set slot_labels = [
+            ('hero', '🖼 Hero Banner (top of newsletter)'),
+            ('section_1_image', '📌 Section 1 Photo'),
+            ('section_2_image', '📌 Section 2 Photo'),
+            ('section_3_image', '📌 Section 3 Photo'),
+          ] %}
+
+          {% for slot_key, slot_label in slot_labels %}
+          {% set assigned = state.photo_slots.get(slot_key) %}
+          <div class="photo-slot {{ 'filled' if assigned else '' }}"
+               id="slot-{{ slot_key }}"
+               onclick="openPicker('{{ slot_key }}', '{{ slot_label }}')">
+            {% if assigned %}
+              <img src="/uploads/{{ assigned }}" alt="">
+            {% else %}
+              <i class="fas fa-plus slot-empty-icon"></i>
+              <span class="slot-empty-text">Click to add photo</span>
+            {% endif %}
+            <div class="slot-label">
+              <span>{{ slot_label }}</span>
+              {% if assigned %}
+              <button class="slot-clear-btn" onclick="clearSlot(event, '{{ slot_key }}')">
+                <i class="fas fa-times"></i>
+              </button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+
+        </div>
+      </div>
+    </div><!-- /panel-newsletter -->
+
+
+    <!-- ══════════════════════════════════════════════
+         PANEL: PREVIEW
+    ══════════════════════════════════════════════ -->
+    <div class="panel" id="panel-preview" style="padding:0;margin:-28px -32px;height:calc(100vh - 60px);display:none;flex-direction:column">
+      <div class="preview-bar">
+        <button class="preview-tab active" onclick="setPreviewTab('email', this)">Weekly Email</button>
+        <button class="preview-tab" onclick="setPreviewTab('newsletter', this)">Monthly Newsletter</button>
+        <div style="flex:1"></div>
+        <a class="btn btn-gold btn-sm" id="preview-download-btn" href="/generate/email" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+      </div>
+      <div class="preview-frame-wrap">
+        <iframe class="preview-frame" id="preview-frame" src="/preview/email"></iframe>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ══════════════════════════════════════════════
+     PHOTO PICKER MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="picker-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="picker-title">Choose a Photo</h3>
+      <button class="close-btn" onclick="closePicker()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="photo-grid" id="picker-grid">
+        <!-- populated by JS -->
+      </div>
+      <p id="picker-empty" style="display:none;color:var(--muted);font-size:13px;text-align:center;padding:32px">
+        No photos in library yet. <a onclick="closePicker();showPanel('photos')" style="color:var(--gold);cursor:pointer">Upload some first.</a>
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closePicker()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toast-msg"></span></div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Panel navigation
+// ---------------------------------------------------------------------------
+const panels = ['dashboard', 'photos', 'newsletter', 'preview'];
+const titles = {
+  dashboard: 'Dashboard',
+  photos: 'Photo Library',
+  newsletter: 'Newsletter Builder',
+  preview: 'Preview',
+};
+
+function showPanel(name) {
+  panels.forEach(p => {
+    const el = document.getElementById(`panel-${p}`);
+    el.classList.remove('active');
+    el.style.display = '';
+  });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const panel = document.getElementById(`panel-${name}`);
+  panel.classList.add('active');
+  if (name === 'preview') {
+    panel.style.display = 'flex';
+  }
+  document.getElementById('topbar-title').textContent = titles[name] || name;
+
+  // Highlight nav
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.trim().toLowerCase().includes(name === 'dashboard' ? 'dashboard' : name.slice(0,4))) {
+      n.classList.add('active');
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Data refresh
+// ---------------------------------------------------------------------------
+function refreshData(btn) {
+  btn.classList.add('spinning');
+  fetch('/api/refresh-data', { method: 'POST' })
+    .then(r => r.json())
+    .then(() => { toast('Data refreshed!'); setTimeout(() => location.reload(), 800); })
+    .catch(() => { btn.classList.remove('spinning'); toast('Refresh failed.'); });
+}
+
+// ---------------------------------------------------------------------------
+// Photo upload
+// ---------------------------------------------------------------------------
+const uploadZone = document.getElementById('upload-zone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  uploadFiles(e.dataTransfer.files);
+});
+uploadZone.addEventListener('click', () => document.getElementById('file-input').click());
+
+function uploadFiles(files) {
+  if (!files || !files.length) return;
+  const form = new FormData();
+  for (const f of files) form.append('photos', f);
+
+  fetch('/api/upload', { method: 'POST', body: form })
+    .then(r => r.json())
+    .then(data => {
+      if (data.uploaded && data.uploaded.length) {
+        toast(`Uploaded ${data.uploaded.length} photo(s)!`);
+        setTimeout(() => location.reload(), 700);
+      }
+    })
+    .catch(() => toast('Upload failed.'));
+}
+
+// ---------------------------------------------------------------------------
+// Photo delete
+// ---------------------------------------------------------------------------
+function deletePhoto(e, name) {
+  e.stopPropagation();
+  if (!confirm(`Delete "${name}"?`)) return;
+  fetch('/api/delete-photo', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  }).then(() => {
+    document.getElementById(`photo-${name}`)?.remove();
+    toast('Photo deleted.');
+    rebuildPickerGrid();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Photo selection (library highlight)
+// ---------------------------------------------------------------------------
+let _selectedPhoto = null;
+function selectPhoto(name) {
+  document.querySelectorAll('.photo-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById(`photo-${name}`);
+  if (card) { card.classList.add('selected'); _selectedPhoto = name; }
+}
+
+// ---------------------------------------------------------------------------
+// Slot management
+// ---------------------------------------------------------------------------
+let _pickerSlot = null;
+
+function openPicker(slot, label) {
+  _pickerSlot = slot;
+  document.getElementById('picker-title').textContent = `Choose photo for: ${label}`;
+  rebuildPickerGrid();
+  document.getElementById('picker-modal').classList.add('open');
+}
+
+function closePicker() {
+  document.getElementById('picker-modal').classList.remove('open');
+  _pickerSlot = null;
+}
+
+function rebuildPickerGrid() {
+  const grid = document.getElementById('picker-grid');
+  const empty = document.getElementById('picker-empty');
+  const cards = document.querySelectorAll('#photo-grid .photo-card');
+
+  if (!cards.length) {
+    grid.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  grid.style.display = 'grid';
+  empty.style.display = 'none';
+  grid.innerHTML = '';
+
+  cards.forEach(card => {
+    const name = card.id.replace('photo-', '');
+    const img = card.querySelector('img');
+    const clone = document.createElement('div');
+    clone.className = 'photo-card';
+    clone.innerHTML = `<img src="${img.src}" loading="lazy"><div class="photo-name">${name}</div>`;
+    clone.onclick = () => assignSlot(name);
+    grid.appendChild(clone);
+  });
+}
+
+function assignSlot(photoName) {
+  if (!_pickerSlot) return;
+  fetch('/api/assign-slot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot: _pickerSlot, photo: photoName }),
+  }).then(() => {
+    closePicker();
+    toast('Photo assigned!');
+    setTimeout(() => location.reload(), 600);
+  });
+}
+
+function clearSlot(e, slot) {
+  e.stopPropagation();
+  fetch('/api/assign-slot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slot, photo: '' }),
+  }).then(() => {
+    toast('Slot cleared.');
+    setTimeout(() => location.reload(), 600);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Text save
+// ---------------------------------------------------------------------------
+function saveText(key, value) {
+  fetch('/api/save-text', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, value }),
+  }).then(() => toast('Text saved.'));
+}
+
+// ---------------------------------------------------------------------------
+// Preview tabs
+// ---------------------------------------------------------------------------
+function setPreviewTab(type, btn) {
+  document.querySelectorAll('.preview-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const frame = document.getElementById('preview-frame');
+  const dlBtn = document.getElementById('preview-download-btn');
+  if (type === 'email') {
+    frame.src = '/preview/email';
+    dlBtn.href = '/generate/email';
+    dlBtn.textContent = ' Download Email';
+  } else {
+    frame.src = '/preview/newsletter';
+    dlBtn.href = '/generate/newsletter';
+    dlBtn.textContent = ' Download Newsletter';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Toast
+// ---------------------------------------------------------------------------
+function toast(msg) {
+  const el = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// Close modal on overlay click
+document.getElementById('picker-modal').addEventListener('click', function(e) {
+  if (e.target === this) closePicker();
+});
+</script>
+
+</body>
+</html>
